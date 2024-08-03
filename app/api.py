@@ -1,13 +1,18 @@
 # Importing modules
 from fastapi import FastAPI
 import joblib
-from test_model import baseline_model_score
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
 
 # Defining app name
 sarcasm_detection=FastAPI()
 
 # Importing models
 baseline_model = joblib.load('./models/baseline_model.pkl')
+
+# Importing dataframe
+df = pd.read_csv('./clean_data/sarcasm_headlines_v2_clean.csv')
 
 # Defining root endpoint
 @sarcasm_detection.get('/')
@@ -21,5 +26,14 @@ def health():
 
 @sarcasm_detection.post('/baseline_score')
 def baseline_score():
-    score = baseline_model_score(baseline_model=baseline_model)
-    return {'Baseline model score': score}
+    # Vectorizing the data
+    tfid_vectorizer = TfidfVectorizer(max_df = 0.75, max_features = 5000, ngram_range=(1,2))
+    weighted_words = pd.DataFrame(tfid_vectorizer.fit_transform(df['cleaned_headline']).toarray(), 
+                                columns=tfid_vectorizer.get_feature_names_out())
+
+    # Defining X and y, and splitting dataset to train/test
+    X = weighted_words
+    y = df['is_sarcastic']
+    _, X_test, _, y_test = train_test_split(X, y, random_state=42, test_size=.2)
+    score = baseline_model.score(X_test, y_test)
+    return {'Baseline model score': round(score, 4)}
