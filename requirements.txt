@@ -10,3 +10,6 @@ scikit-learn
 fastapi
 uvicorn
 joblib
+word2vec
+nltk
+text_unidecode
