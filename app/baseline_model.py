@@ -24,7 +24,7 @@ weighted_words = pd.DataFrame(tfid_vectorizer.fit_transform(df['cleaned_headline
 # Defining X and y, and splitting dataset to train/test
 X = weighted_words
 y = df['is_sarcastic']
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=.2)
+X_train, _, y_train, _ = train_test_split(X, y, random_state=42, test_size=.2)
 
 # Instanciating LogisticRegression model
 log_reg = LogisticRegression(n_jobs=-1)
